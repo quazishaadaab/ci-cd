@@ -1,0 +1,18 @@
+# Using https://hub.docker.com/r/pipelinecomponents/jsonlint
+jsonlint:
+  stage: verify
+  image: shared-docker-remote.artifactory.int.bell.ca/pipelinecomponents/jsonlint:0.18.0
+  tags:
+  - openshift
+  - belmont
+  - dev
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - changes:
+      - "**/*.json"
+  allow_failure: true
+  script: # Current script will lint all json files in project
+    - |
+      find . -not -path './.git/*' -name '*.json' -type f -print0 |
+      parallel -k -0 -n1 --group --verbose jsonlint --compact

@@ -1,0 +1,38 @@
+.build-base:
+  image: registry.gitlab.int.bell.ca/tvsre-tools/kubectl:oc_v48
+  rules: 
+      if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+  variables:
+    KUBECONFIG: /var/tmp/.kube/config
+    no_proxy: localhost,gitlab.int.bell.ca,registry.git.int.bell.ca,int.bell.ca
+    PROJECT_NAME: tvsre-dev
+    REPO_URL: "https://tvsre_tools:$TVSRE_TOOLS_TOKEN@gitlab.int.bell.ca/$CI_PROJECT_PATH.git"
+    OUTPUT_BRANCH: "registry.gitlab.int.bell.ca/$CI_PROJECT_PATH"
+  tags:
+    - openshift
+    - dev
+    - belmont
+  before_script:
+    - oc login --token=$OPENSHIFT_TVSRE_DEV_BUILDER_TOKEN --server=https://api.06.caas.mtrlpq02.stratus.int.bell.ca:6443 --insecure-skip-tls-verify=true
+    - oc version
+    - oc project $PROJECT_NAME
+    - oc secrets link builder imagerepo
+
+.build-branch:
+  extends: .build-base
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+  variables:
+    DEPLOYMENT_NAME: "tvsre-gitlabcicd-$CI_PROJECT_NAME-$CI_COMMIT_BRANCH"
+
+.build-tag:
+  extends: .build-base
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: always
+  variables:
+    DEPLOYMENT_NAME: "tvsre-gitlabcicd-$CI_PROJECT_NAME-$CI_COMMIT_TAG"

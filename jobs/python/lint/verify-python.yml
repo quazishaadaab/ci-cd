@@ -1,0 +1,7 @@
+include:
+  - project: 'tvsre-tools/lib/gitlab-ci-templates'
+    ref: main
+    file:
+      - '/jobs/python/lint/pylint.yml'
+      - '/jobs/python/lint/flake8.yml'
+      - '/jobs/json/lint/jsonlint.yml'

@@ -1,0 +1,14 @@
+# Reference: https://yamllint.readthedocs.io/en/stable/configuration.html
+
+yamllint:
+  image: registry.gitlab.int.bell.ca/tvsre-tools/lib/base-images/rhel:ubi8-python-3.9-linter-dev
+  stage: verify
+  tags:
+    - tvsre_tools
+    - simcoe
+  rules:
+    - changes:
+      - "**/*.yml"
+      - "**/*.yaml"
+  script:
+    - yamllint -c "$YAML_LINT_CONFIG" .
